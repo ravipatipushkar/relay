@@ -17,7 +17,7 @@ import type {FragmentType} from '../RelayStoreTypes';
 const {readFragment} = require('../ResolverFragments');
 const invariant = require('invariant');
 
-type ResolverFn = ($FlowFixMe, ?$FlowFixMe) => mixed;
+type ResolverFn = ($FlowFixMe, ?$FlowFixMe, ?$FlowFixMe) => mixed;
 
 /**
  *
@@ -38,9 +38,9 @@ function resolverDataInjector<TFragmentType: FragmentType, TData: ?{...}>(
   _resolverFn: $FlowFixMe,
   fieldName?: string,
   isRequiredField?: boolean,
-): (fragmentKey: TFragmentType, args: mixed) => mixed {
+): (fragmentKey: TFragmentType, args: mixed, context: mixed) => mixed {
   const resolverFn: ResolverFn = _resolverFn;
-  return (fragmentKey: TFragmentType, args: mixed): mixed => {
+  return (fragmentKey: TFragmentType, args: mixed, context: mixed): mixed => {
     const data = readFragment(fragment, fragmentKey);
     if (fieldName != null) {
       if (data == null) {
@@ -52,7 +52,7 @@ function resolverDataInjector<TFragmentType: FragmentType, TData: ?{...}>(
             fragment.name,
           );
         } else {
-          return resolverFn(null, args);
+          return resolverFn(null, args, context);
         }
       }
 
@@ -70,7 +70,7 @@ function resolverDataInjector<TFragmentType: FragmentType, TData: ?{...}>(
         }
 
         // $FlowFixMe[invalid-computed-prop]
-        return resolverFn(data[fieldName], args);
+        return resolverFn(data[fieldName], args, context);
       } else {
         // If both `data` and `fieldName` is available, we expect the
         // `fieldName` field in the `data` object.
@@ -83,7 +83,7 @@ function resolverDataInjector<TFragmentType: FragmentType, TData: ?{...}>(
       }
     } else {
       // By default we will pass the full set of the fragment data to the resolver
-      return resolverFn(data, args);
+      return resolverFn(data, args, context);
     }
   };
 }
